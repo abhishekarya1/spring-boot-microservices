@@ -1,0 +1,49 @@
+server:
+  port: 9001
+
+spring:
+  application:
+    name: USER-SERVICE
+  zipkin:
+    base-url: http://localhost:9411
+
+# actuator configs
+management:
+  health:
+    circuitbreakers:
+      enabled: true
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: always
+
+# resilience4j configs
+resilience4j:
+  circuitbreaker:
+    instances:
+      testBreaker:    # same name as specified in annotation in controller
+        registerHealthIndicator: true
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpenEnabled: true
+        waitDurationInOpenState: 5s
+        permittedNumberOfCallsInHalfOpenState: 3
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED
+  retry:
+    instances:
+      testBreaker:    # same name as specified in annotation in controller
+        registerHealthIndicator: true
+        maxRetryAttempts: 5
+        waitDuration: 10s
+  ratelimiter:
+    instances:
+      testBreaker:    # same name as specified in annotation in controller
+        registerHealthIndicator: false
+        limitForPeriod: 10
+        limitRefreshPeriod: 10s
+        timeoutDuration: 3s
